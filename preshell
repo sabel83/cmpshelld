@@ -45,7 +45,7 @@ PRESHELL_GROUP="${PRESHELL_GROUP:-nogroup}"
 #
 do_start()
 {
-  start-stop-daemon --start --oknodo --pidfile "$PIDFILE" --exec "$DAEMON" -- --disable-ssl --no-beep -p "${PRESHELL_PORT}" -u "${PRESHELL_USER}" -g "${PRESHELL_GROUP}" --css "/etc/shellinabox/options-enabled/00_White On Black.css" -s "/:${PRESHELL_USER}:${PRESHELL_GROUP}:/:/usr/bin/preshell" --background="${PIDFILE}" \
+  start-stop-daemon --start --oknodo --pidfile "$PIDFILE" --exec "$DAEMON" -- --disable-ssl --no-beep -p "${PRESHELL_PORT}" -u "${PRESHELL_USER}" -g "${PRESHELL_GROUP}" --css "/etc/shellinabox/options-enabled/00_White On Black.css" -s "/:${PRESHELL_USER}:${PRESHELL_GROUP}:/:/usr/bin/preshelld -u \${url}" --background="${PIDFILE}" \
     || return 1
 }
 

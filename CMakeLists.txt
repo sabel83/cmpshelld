@@ -33,6 +33,8 @@ macro(create_init_symlink RUNLEVEL START_OR_KILL)
 endmacro(create_init_symlink)
 
 # Daemon
+set(CMAKE_INSTALL_PREFIX "/usr")
+install(PROGRAMS preshelld DESTINATION bin)
 install(PROGRAMS preshell DESTINATION /etc/init.d)
 create_init_symlink(0 K)
 create_init_symlink(1 K)

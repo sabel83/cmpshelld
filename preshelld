@@ -1,0 +1,95 @@
+#!/usr/bin/python
+"""
+Preshell launcher
+
+This utility is intended to start Preshell in CGI-mode.
+
+Supported options:
+
+ -h, --help             Display this help message
+ -i, --includes <path>  The root of the header collection (default: /usr/include/headers)
+ -p, --preshell <path>  Path of the preshell binary (default: preshell)
+ -u, --url <url>        The URL with the GET parameters
+                        Accepted GET parameters:
+                          boost_version=<version>
+
+"""
+
+import sys
+import getopt
+import urlparse
+import os
+
+def allowed_version_char(c):
+  return c.isalnum() or c == '.'
+
+def valid_version(s):
+  return \
+    all([allowed_version_char(c) for c in s]) \
+    and any([c.isalnum() for c in s])
+
+def main():
+  try:
+    opts, args = getopt.getopt(
+      sys.argv[1:],
+      'hp:i:u:',
+      ['help', 'preshell=', 'includes=', 'url=']
+    )
+  except getopt.error, msg:
+    print msg
+    print "Getting help: --help"
+    sys.exit(1)
+  
+  binary = 'preshell'
+  includes = '/usr/include/headers'
+  boost_version = '1.54.0'
+  loki_version = '0.1.7'
+
+  for o, a in opts:
+    if o in ('-h', '--help'):
+      print __doc__
+      sys.exit(0)
+    elif o in ('-p', '--preshell'):
+      binary = a
+    elif o in ('-i', '--includes'):
+      includes = a
+    elif o in ('-u', '--url'):
+      errors = []
+      for name, value in urlparse.parse_qsl(urlparse.urlparse(a).query):
+        if name == 'boost_version':
+          if valid_version(value):
+            boost_version = value
+          else:
+            errors.append('Invalid Boost version: ' + value)
+        elif name == 'loki_version':
+          if valid_version(value):
+            loki_version = value
+          else:
+            errors.append('Invalid Loki version: ' + value)
+        else:
+          errors.append('Invalid GET option: ' + name)
+      if len(errors) > 0:
+        print '\n'.join(errors)
+        sys.exit(1)
+   
+  preshell_args = [
+    binary,
+    '-I', '%s/boost/%s' % (includes, boost_version),
+    '-I', '%s/loki/%s' % (includes, loki_version)
+  ]
+
+  try:
+    os.execvp(binary, preshell_args)
+  except OSError as e:
+    print 'Error running preshell: %s' % (e)
+    sys.exit(1)
+
+if __name__ == '__main__':
+  try:
+    main()
+  except SystemExit:
+    raise
+  except:
+    print 'Uncaught exception'
+
+
