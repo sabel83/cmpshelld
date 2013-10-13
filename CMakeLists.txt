@@ -16,33 +16,35 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-project(preshelld)
-set(CMAKE_PROJECT_NAME preshelld)
+project(cmpshelld)
+set(CMAKE_PROJECT_NAME cmpshelld)
 set(MAJOR_VERSION 0)
 set(MINOR_VERSION 1)
 set(PATCH_VERSION 0)
 
-macro(create_init_symlink RUNLEVEL START_OR_KILL)
-  set(LINK_NAME ${CMAKE_CURRENT_BINARY_DIR}/${START_OR_KILL}20preshell)
+macro(create_init_symlink RUNLEVEL SHELL START_OR_KILL)
+  set(LINK_NAME ${CMAKE_CURRENT_BINARY_DIR}/${START_OR_KILL}20${SHELL})
 
   execute_process(
     COMMAND
-      "${CMAKE_COMMAND}" -E create_symlink /etc/init.d/preshell "${LINK_NAME}"
+      "${CMAKE_COMMAND}" -E create_symlink /etc/init.d/${SHELL} "${LINK_NAME}"
   )
   install(FILES "${LINK_NAME}" DESTINATION /etc/rc${RUNLEVEL}.d)
 endmacro(create_init_symlink)
 
 # Daemon
 set(CMAKE_INSTALL_PREFIX "/usr")
-install(PROGRAMS preshelld DESTINATION bin)
-install(PROGRAMS preshell DESTINATION /etc/init.d)
-create_init_symlink(0 K)
-create_init_symlink(1 K)
-create_init_symlink(2 S)
-create_init_symlink(3 S)
-create_init_symlink(4 S)
-create_init_symlink(5 S)
-create_init_symlink(6 K)
+install(PROGRAMS cmpshelld DESTINATION bin)
+foreach (I preshell metashell)
+  install(PROGRAMS ${I} DESTINATION /etc/init.d)
+  create_init_symlink(0 ${I} K)
+  create_init_symlink(1 ${I} K)
+  create_init_symlink(2 ${I} S)
+  create_init_symlink(3 ${I} S)
+  create_init_symlink(4 ${I} S)
+  create_init_symlink(5 ${I} S)
+  create_init_symlink(6 ${I} K)
+endforeach(I)
 
 # Debian package
 if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
@@ -52,8 +54,8 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_PACKAGING_INSTALL_PREFIX "/tmp")
   set(CPACK_GENERATOR "DEB")
    
-  set(CPACK_PACKAGE_DESCRIPTION "Preshell daemon")
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "It is a daemon for Preshell")
+  set(CPACK_PACKAGE_DESCRIPTION "C++ Metaprogramming shell daemons")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "It is a daemon for Preshell and Metashell")
   set(CPACK_PACKAGE_VENDOR "Abel Sinkovics")
   set(CPACK_PACKAGE_CONTACT "abel@sinkovics.hu")
   set(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
@@ -62,7 +64,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}_${CMAKE_SYSTEM_PROCESSOR}")
   set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
 
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "preshell, shellinabox")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "preshell, metashell, shellinabox")
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
   set(CPACK_DEBIAN_ARCHITECTURE "all") # Config-only

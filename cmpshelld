@@ -1,17 +1,18 @@
 #!/usr/bin/python
 """
-Preshell launcher
+C++ metaprogramming shell launcher
 
-This utility is intended to start Preshell in CGI-mode.
+This utility starts the shell in CGI-mode.
 
 Supported options:
 
  -h, --help             Display this help message
  -i, --includes <path>  The root of the header collection (default: /usr/include/headers)
- -p, --preshell <path>  Path of the preshell binary (default: preshell)
+ -s, --shell <path>     Path of the shell binary
  -u, --url <url>        The URL with the GET parameters
                         Accepted GET parameters:
                           boost_version=<version>
+                          loki_version=<version>
 
 """
 
@@ -32,15 +33,15 @@ def main():
   try:
     opts, args = getopt.getopt(
       sys.argv[1:],
-      'hp:i:u:',
-      ['help', 'preshell=', 'includes=', 'url=']
+      'hs:i:u:',
+      ['help', 'shell=', 'includes=', 'url=']
     )
   except getopt.error, msg:
     print msg
     print "Getting help: --help"
     sys.exit(1)
   
-  binary = 'preshell'
+  binary = ''
   includes = '/usr/include/headers'
   boost_version = '1.54.0'
   loki_version = '0.1.7'
@@ -49,7 +50,7 @@ def main():
     if o in ('-h', '--help'):
       print __doc__
       sys.exit(0)
-    elif o in ('-p', '--preshell'):
+    elif o in ('-s', '--shell'):
       binary = a
     elif o in ('-i', '--includes'):
       includes = a
@@ -71,17 +72,22 @@ def main():
       if len(errors) > 0:
         print '\n'.join(errors)
         sys.exit(1)
+
+  if binary == '':
+    print 'The shell binary has not been provided.'
+    print 'Getting help: --help'
+    sys.exit(1)
    
-  preshell_args = [
+  shell_args = [
     binary,
     '-I', '%s/boost/%s' % (includes, boost_version),
     '-I', '%s/loki/%s' % (includes, loki_version)
   ]
 
   try:
-    os.execvp(binary, preshell_args)
+    os.execvp(binary, shell_args)
   except OSError as e:
-    print 'Error running preshell: %s' % (e)
+    print 'Error running the shell: %s' % (e)
     sys.exit(1)
 
 if __name__ == '__main__':
