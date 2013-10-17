@@ -9,11 +9,12 @@ Supported options:
  -h, --help             Display this help message
  -i, --includes <path>  The root of the header collection (default: /usr/include/headers)
  -s, --shell <path>     Path of the shell binary
+ -l, --log <path>       Log into that file
+ -p, --peer <name>      Name of remote peer
  -u, --url <url>        The URL with the GET parameters
                         Accepted GET parameters:
                           boost_version=<version>
                           loki_version=<version>
-
 """
 
 import sys
@@ -21,6 +22,25 @@ import getopt
 import urlparse
 import os
 import resource
+import time
+import fcntl
+import json
+import datetime
+
+def append_to_file(filename, s):
+  f = open(filename, 'a')
+  fcntl.flock(f, fcntl.LOCK_EX)
+  try:
+    f.write(s)
+  finally:
+    fcntl.flock(f, fcntl.LOCK_UN)
+  f.close()
+
+def log(filename, msg):
+  if filename != '':
+    suffix = datetime.datetime.now().strftime("_%Y_%m_%d")
+    msg['timestamp'] = time.time()
+    append_to_file(filename + suffix, json.dumps(msg) + '\n')
 
 def allowed_version_char(c):
   return c.isalnum() or c == '.'
@@ -38,8 +58,8 @@ def main():
   try:
     opts, args = getopt.getopt(
       sys.argv[1:],
-      'hs:i:u:',
-      ['help', 'shell=', 'includes=', 'url=']
+      'hs:i:u:l:p:',
+      ['help', 'shell=', 'includes=', 'url=', 'log=', 'peer=']
     )
   except getopt.error, msg:
     print msg
@@ -50,16 +70,24 @@ def main():
   includes = '/usr/include/headers'
   boost_version = '1.54.0'
   loki_version = '0.1.7'
+  logfile = ''
+  peer = ''
+  url = ''
 
   for o, a in opts:
     if o in ('-h', '--help'):
       print __doc__
       sys.exit(0)
+    elif o in ('-l', '--log'):
+      logfile = a
+    elif o in ('-p', '--peer'):
+      peer = a
     elif o in ('-s', '--shell'):
       binary = a
     elif o in ('-i', '--includes'):
       includes = a
     elif o in ('-u', '--url'):
+      url = a
       errors = []
       for name, value in urlparse.parse_qsl(urlparse.urlparse(a).query):
         if name == 'boost_version':
@@ -88,6 +116,8 @@ def main():
     '-I', '%s/boost/%s' % (includes, boost_version),
     '-I', '%s/loki/%s' % (includes, loki_version)
   ]
+
+  log(logfile, {'peer' : peer, 'cmd' : shell_args, 'url' : url})
 
   limit_memory(256)
 
