@@ -20,6 +20,7 @@ import sys
 import getopt
 import urlparse
 import os
+import resource
 
 def allowed_version_char(c):
   return c.isalnum() or c == '.'
@@ -28,6 +29,10 @@ def valid_version(s):
   return \
     all([allowed_version_char(c) for c in s]) \
     and any([c.isalnum() for c in s])
+
+def limit_memory(mb):
+  b = mb * 1024 * 1024
+  resource.setrlimit(resource.RLIMIT_AS, (b, b))
 
 def main():
   try:
@@ -83,6 +88,8 @@ def main():
     '-I', '%s/boost/%s' % (includes, boost_version),
     '-I', '%s/loki/%s' % (includes, loki_version)
   ]
+
+  limit_memory(256)
 
   try:
     os.execvp(binary, shell_args)
