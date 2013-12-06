@@ -15,6 +15,7 @@ Supported options:
                         Accepted GET parameters:
                           boost_version=<version>
                           loki_version=<version>
+                          mpllibs_version=<version>
 """
 
 import sys
@@ -70,6 +71,7 @@ def main():
   includes = '/usr/include/headers'
   boost_version = '1.54.0'
   loki_version = '0.1.7'
+  mpllibs_version = '1.0.0'
   logfile = ''
   peer = ''
   url = ''
@@ -100,6 +102,11 @@ def main():
             loki_version = value
           else:
             errors.append('Invalid Loki version: ' + value)
+        elif name == 'mpllibs_version':
+          if valid_version(value):
+            mpllibs_version = value
+          else:
+            errors.append('Invalid Mpllibs version: ' + value)
         else:
           errors.append('Invalid GET option: ' + name)
       if len(errors) > 0:
@@ -114,7 +121,8 @@ def main():
   shell_args = [
     binary,
     '-I', '%s/boost/%s' % (includes, boost_version),
-    '-I', '%s/loki/%s' % (includes, loki_version)
+    '-I', '%s/loki/%s' % (includes, loki_version),
+    '-I', '%s/mpllibs/%s' % (includes, mpllibs_version)
   ]
 
   log(logfile, {'peer' : peer, 'cmd' : shell_args, 'url' : url})
