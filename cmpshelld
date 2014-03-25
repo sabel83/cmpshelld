@@ -72,6 +72,7 @@ def main():
   boost_version = '1.54.0'
   loki_version = '0.1.7'
   mpllibs_version = '1.0.0'
+  FTMP_version = '7d36043be1313d8e564aa3c275d7187c7aa85339'
   logfile = ''
   peer = ''
   url = ''
@@ -107,6 +108,11 @@ def main():
             mpllibs_version = value
           else:
             errors.append('Invalid Mpllibs version: ' + value)
+        elif name == 'FTMP_version':
+          if valid_version(value):
+            FTMP_version = value
+          else:
+            errors.append('Invalid FTMP version: ' + value)
         else:
           errors.append('Invalid GET option: ' + name)
       if len(errors) > 0:
@@ -122,7 +128,8 @@ def main():
     binary,
     '-I', '%s/boost/%s' % (includes, boost_version),
     '-I', '%s/loki/%s' % (includes, loki_version),
-    '-I', '%s/mpllibs/%s' % (includes, mpllibs_version)
+    '-I', '%s/mpllibs/%s' % (includes, mpllibs_version),
+    '-I', '%s/FTMP/%s' % (includes, FTMP_version)
   ]
 
   log(logfile, {'peer' : peer, 'cmd' : shell_args, 'url' : url})
