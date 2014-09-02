@@ -126,10 +126,10 @@ def main():
    
   shell_args = [
     binary,
-    '-I', '%s/boost/%s' % (includes, boost_version),
-    '-I', '%s/loki/%s' % (includes, loki_version),
-    '-I', '%s/mpllibs/%s' % (includes, mpllibs_version),
-    '-I', '%s/FTMP/%s' % (includes, FTMP_version)
+    '-I', os.path.realpath('%s/boost/%s' % (includes, boost_version)),
+    '-I', os.path.realpath('%s/loki/%s' % (includes, loki_version)),
+    '-I', os.path.realpath('%s/mpllibs/%s' % (includes, mpllibs_version)),
+    '-I', os.path.realpath('%s/FTMP/%s' % (includes, FTMP_version))
   ]
 
   log(logfile, {'peer' : peer, 'cmd' : shell_args, 'url' : url})
