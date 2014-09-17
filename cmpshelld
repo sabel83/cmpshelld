@@ -132,7 +132,7 @@ def main():
 
   log(logfile, {'peer' : peer, 'cmd' : shell_args, 'url' : url})
 
-  limit_memory(256)
+  limit_memory(2048)
 
   try:
     os.execvp(binary, shell_args)
