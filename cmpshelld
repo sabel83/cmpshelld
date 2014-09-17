@@ -14,9 +14,7 @@ Supported options:
  -u, --url <url>        The URL with the GET parameters
                         Accepted GET parameters:
                           _std=c++0x|c++11|c++1y
-                          boost_version=<version>
-                          loki_version=<version>
-                          mpllibs_version=<version>
+                          <library name>_version=<version>
 """
 
 import sys
@@ -45,7 +43,7 @@ def log(filename, msg):
     append_to_file(filename + suffix, json.dumps(msg) + '\n')
 
 def allowed_version_char(c):
-  return c.isalnum() or c == '.'
+  return c.isalnum() or c in ['.', '_']
 
 def valid_version(s):
   return \
@@ -54,6 +52,9 @@ def valid_version(s):
 
 def valid_standard(s):
   return s in ['c++0x', 'c++11', 'c++1y']
+
+def lib_exists(includes, s):
+  return os.path.isdir('%s/%s' % (includes, s))
 
 def limit_memory(mb):
   b = mb * 1024 * 1024
@@ -73,10 +74,7 @@ def main():
   
   binary = ''
   includes = '/usr/include/headers'
-  boost_version = '1.54.0'
-  loki_version = '0.1.7'
-  mpllibs_version = '1.0.0'
-  FTMP_version = '7d36043be1313d8e564aa3c275d7187c7aa85339'
+  lib_versions = {}
   std = ''
   logfile = ''
   peer = ''
@@ -98,26 +96,16 @@ def main():
       url = a
       errors = []
       for name, value in urlparse.parse_qsl(urlparse.urlparse(a).query):
-        if name == 'boost_version':
-          if valid_version(value):
+        if name.endswith('_version'):
+          lib_name = name[:len(name) - len('_version')]
+          if valid_version(lib_name):
+            if valid_version(value):
+              lib_versions[lib_name] = value
+            else:
+              errors.append('Invalid %s version: %s' % (lib_name, value))
             boost_version = value
           else:
-            errors.append('Invalid Boost version: ' + value)
-        elif name == 'loki_version':
-          if valid_version(value):
-            loki_version = value
-          else:
-            errors.append('Invalid Loki version: ' + value)
-        elif name == 'mpllibs_version':
-          if valid_version(value):
-            mpllibs_version = value
-          else:
-            errors.append('Invalid Mpllibs version: ' + value)
-        elif name == 'FTMP_version':
-          if valid_version(value):
-            FTMP_version = value
-          else:
-            errors.append('Invalid FTMP version: ' + value)
+            errors.append('Invalid library name: %s' % (lib_name))
         elif name == '_std':
           if valid_standard(value):
             std = value
@@ -132,13 +120,13 @@ def main():
     print 'Getting help: --help'
     sys.exit(1)
    
-  shell_args = [
-    binary,
-    '-I', os.path.realpath('%s/boost/%s' % (includes, boost_version)),
-    '-I', os.path.realpath('%s/loki/%s' % (includes, loki_version)),
-    '-I', os.path.realpath('%s/mpllibs/%s' % (includes, mpllibs_version)),
-    '-I', os.path.realpath('%s/FTMP/%s' % (includes, FTMP_version))
-  ]
+  shell_args = [binary]
+  for l,v in lib_versions.items():
+    if lib_exists(includes, l):
+      shell_args.extend(['-I', os.path.realpath('%s/%s/%s' % (includes, l, v))])
+    else:
+      print 'Library not found: %s' % (l)
+      sys.exit(1)
   if std != '':
     shell_args.extend(['--std', std])
 
