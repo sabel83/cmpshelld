@@ -13,6 +13,7 @@ Supported options:
  -p, --peer <name>      Name of remote peer
  -u, --url <url>        The URL with the GET parameters
                         Accepted GET parameters:
+                          _std=c++0x|c++11|c++1y
                           boost_version=<version>
                           loki_version=<version>
                           mpllibs_version=<version>
@@ -51,6 +52,9 @@ def valid_version(s):
     all([allowed_version_char(c) for c in s]) \
     and any([c.isalnum() for c in s])
 
+def valid_standard(s):
+  return s in ['c++0x', 'c++11', 'c++1y']
+
 def limit_memory(mb):
   b = mb * 1024 * 1024
   resource.setrlimit(resource.RLIMIT_AS, (b, b))
@@ -73,6 +77,7 @@ def main():
   loki_version = '0.1.7'
   mpllibs_version = '1.0.0'
   FTMP_version = '7d36043be1313d8e564aa3c275d7187c7aa85339'
+  std = 'c++1y'
   logfile = ''
   peer = ''
   url = ''
@@ -113,6 +118,9 @@ def main():
             FTMP_version = value
           else:
             errors.append('Invalid FTMP version: ' + value)
+        elif name == '_std':
+          if valid_standard(value):
+            std = value
         else:
           errors.append('Invalid GET option: ' + name)
       if len(errors) > 0:
@@ -129,7 +137,8 @@ def main():
     '-I', os.path.realpath('%s/boost/%s' % (includes, boost_version)),
     '-I', os.path.realpath('%s/loki/%s' % (includes, loki_version)),
     '-I', os.path.realpath('%s/mpllibs/%s' % (includes, mpllibs_version)),
-    '-I', os.path.realpath('%s/FTMP/%s' % (includes, FTMP_version))
+    '-I', os.path.realpath('%s/FTMP/%s' % (includes, FTMP_version)),
+    '--std', std
   ]
 
   log(logfile, {'peer' : peer, 'cmd' : shell_args, 'url' : url})
