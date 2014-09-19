@@ -47,7 +47,7 @@ METASHELL_GROUP="${METASHELL_GROUP:-nogroup}"
 #
 do_start()
 {
-  start-stop-daemon --start --oknodo --pidfile "$PIDFILE" --exec "$DAEMON" -- --disable-ssl --no-beep -p "${METASHELL_PORT}" -u "${METASHELL_USER}" -g "${METASHELL_GROUP}" --css "/etc/shellinabox/options-enabled/00_White On Black.css" -s "/:${METASHELL_USER}:${METASHELL_GROUP}:/:/usr/bin/cmpshelld -s metashell -l ${LOGFILE} -p \${peer} -u \${url}" --background="${PIDFILE}" \
+  start-stop-daemon --start --oknodo --pidfile "$PIDFILE" --exec "$DAEMON" -- --disable-ssl --no-beep -p "${METASHELL_PORT}" -u "${METASHELL_USER}" -g "${METASHELL_GROUP}" --css "/usr/share/solarized.css" -s "/:${METASHELL_USER}:${METASHELL_GROUP}:/:/usr/bin/cmpshelld -s metashell -l ${LOGFILE} -p \${peer} -u \${url}" --background="${PIDFILE}" \
     || return 1
 }
 

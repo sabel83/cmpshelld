@@ -35,6 +35,7 @@ endmacro(create_init_symlink)
 # Daemon
 set(CMAKE_INSTALL_PREFIX "/usr")
 install(PROGRAMS cmpshelld DESTINATION bin)
+install(FILES solarized.css DESTINATION share)
 foreach (I preshell metashell)
   install(PROGRAMS ${I} DESTINATION /etc/init.d)
   create_init_symlink(0 ${I} K)
