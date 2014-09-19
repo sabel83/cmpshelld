@@ -165,7 +165,7 @@
 #vt100 .ansi12              { color:            #839496; } /* base0 */
 #vt100 .ansi13              { color:            #073642; } /* base02 ? */
 #vt100 .ansi14              { color:            #93a1a1; } /* base1 */
-#vt100 .ansi15              { color:            #002b36; } /* base03 */
+#vt100 .ansi15              { color:            #ffffff; } /* base03 (modified) */
 
 #vt100 .bgAnsi0             { background-color: #073642; }
 #vt100 .bgAnsi1             { background-color: #dc322f; }
