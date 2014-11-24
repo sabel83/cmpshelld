@@ -33,7 +33,9 @@ macro(create_init_symlink RUNLEVEL SHELL START_OR_KILL)
 endmacro(create_init_symlink)
 
 # Daemon
-set(CMAKE_INSTALL_PREFIX "/usr")
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "/usr")
+endif()
 install(PROGRAMS cmpshelld DESTINATION bin)
 install(FILES solarized.css DESTINATION share)
 foreach (I preshell metashell)
