@@ -6,6 +6,7 @@ This utility starts the shell in CGI-mode.
 
 Supported options:
 
+ -e, --extra <arg>      Pass extra argument to the shell (after --)
  -h, --help             Display this help message
  -i, --includes <path>  The root of the header collection (default: /usr/include/headers)
  -s, --shell <path>     Path of the shell binary
@@ -64,8 +65,8 @@ def main():
   try:
     opts, args = getopt.getopt(
       sys.argv[1:],
-      'hs:i:u:l:p:',
-      ['help', 'shell=', 'includes=', 'url=', 'log=', 'peer=']
+      'hs:i:u:l:p:e:',
+      ['help', 'shell=', 'includes=', 'url=', 'log=', 'peer=', 'extra=']
     )
   except getopt.error, msg:
     print msg
@@ -79,6 +80,7 @@ def main():
   logfile = ''
   peer = ''
   url = ''
+  extra_args = []
 
   for o, a in opts:
     if o in ('-h', '--help'):
@@ -114,6 +116,8 @@ def main():
       if len(errors) > 0:
         print '\n'.join(errors)
         sys.exit(1)
+    elif o in ('-e', '--extra'):
+      extra_args.append(a)
 
   if binary == '':
     print 'The shell binary has not been provided.'
@@ -129,6 +133,9 @@ def main():
       sys.exit(1)
   if std != '':
     shell_args.extend(['--std', std])
+  if len(extra_args) != 0:
+    shell_args.append('--')
+    shell_args.extend(extra_args)
 
   log(logfile, {'peer' : peer, 'cmd' : shell_args, 'url' : url})
 

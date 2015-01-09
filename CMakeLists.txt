@@ -36,10 +36,11 @@ endmacro(create_init_symlink)
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "/usr")
 endif()
-install(PROGRAMS cmpshelld DESTINATION bin)
-install(FILES solarized.css DESTINATION share)
-foreach (I preshell metashell)
-  install(PROGRAMS ${I} DESTINATION /etc/init.d)
+install(PROGRAMS app/cmpshelld DESTINATION bin)
+install(PROGRAMS app/shell_demo DESTINATION bin)
+install(FILES share/solarized.css DESTINATION share)
+foreach (I preshell metashell shell_demo)
+  install(PROGRAMS init.d/${I} DESTINATION /etc/init.d)
   create_init_symlink(0 ${I} K)
   create_init_symlink(1 ${I} K)
   create_init_symlink(2 ${I} S)
@@ -48,34 +49,4 @@ foreach (I preshell metashell)
   create_init_symlink(5 ${I} S)
   create_init_symlink(6 ${I} K)
 endforeach(I)
-
-# Debian package
-if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
-  include(InstallRequiredSystemLibraries)
-   
-  set(CPACK_SET_DESTDIR "on")
-  set(CPACK_PACKAGING_INSTALL_PREFIX "/tmp")
-  set(CPACK_GENERATOR "DEB")
-   
-  set(CPACK_PACKAGE_DESCRIPTION "C++ Metaprogramming shell daemons")
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "It is a daemon for Preshell and Metashell")
-  set(CPACK_PACKAGE_VENDOR "Abel Sinkovics")
-  set(CPACK_PACKAGE_CONTACT "abel@sinkovics.hu")
-  set(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
-  set(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
-  set(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
-  set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}_${CMAKE_SYSTEM_PROCESSOR}")
-  set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
-
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "preshell, metashell, shellinabox")
-  set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-  set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
-  set(CPACK_DEBIAN_ARCHITECTURE "all") # Config-only
-   
-  set(CPACK_COMPONENTS_ALL Libraries ApplicationData)
-  include(CPack)
-   
-endif(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
-
-
 

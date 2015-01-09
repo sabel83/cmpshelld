@@ -1,0 +1,168 @@
+#!/bin/bash
+#
+# Deployment script of the online Metashell and Preshell demos
+# Copyright (C) 2015, Abel Sinkovics (abel@sinkovics.hu)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+function git_repo_begin {
+  HOST="$1"
+  USER="$2"
+  NAME="$3"
+  DIR_NAME="${USER}_${NAME}"
+  if [ -e "${DIR_NAME}" ]; then
+    echo "${DIR_NAME} already exists"
+  else
+    git clone --recursive "https://${HOST}/${USER}/${NAME}.git" "${DIR_NAME}"
+  fi
+  cd "${DIR_NAME}"
+  git pull origin master
+  git submodule foreach git pull
+}
+
+function git_repo_end {
+  cd ..
+}
+
+function follow_git_repo {
+  HOST="$1"
+  USER="$2"
+  NAME="$3"
+  BRANCH="$4"
+  HEADER_PATH="$5"
+  INCLUDE="$(pwd)/include"
+
+  git_repo_begin "${HOST}" "${USER}" "${NAME}"
+    REV=`git rev-parse "${BRANCH}"`
+    INSTALLED="${INCLUDE}/headers/${NAME}/${REV}"
+    if [ ! -d "${INSTALLED}" ]
+    then
+      mkdir -p "${INSTALLED}"
+      cp -r "${HEADER_PATH}" "${INSTALLED}"
+      ln -fs "${REV}" "${INCLUDE}/headers/${NAME}/${BRANCH}"
+    fi
+  git_repo_end
+}
+
+function write_version_desc {
+  git log -1 --pretty="%h %B" | head -1 \
+    | sed 's/\\/\\\\/g' \
+    | sed 's/"/\\"/g' \
+    | sed 's/^/"/' | sed 's/$/\\n This demo is supported by the Eotvos Lorand University, Faculty of Informatics"/' \
+    > lib/version_desc.hpp
+}
+
+function upgrade {
+  BIN="$(pwd)/bin"
+  INCLUDE="$(pwd)/include"
+  USR_INCLUDE="${INCLUDE}/usr/include"
+
+  mkdir bin
+
+  mkdir -p "${USR_INCLUDE}"
+  ln -s \
+    $(ls -d /usr/include/* | egrep -v '^/usr/include/(boost|mpllibs)$') \
+    "${USR_INCLUDE}"
+
+  git_repo_begin github.com sabel83 preshell
+    REV=`git rev-parse master`
+    INSTALLED="${BIN}/preshell_${REV}"
+
+    if [ ! -f "${INSTALLED}" ]
+    then
+      tools/gcc_default_path --gcc=g++ \
+        | egrep -v '"/usr/include"' \
+        > lib/default_sysinclude.hpp
+      echo ", \"${USR_INCLUDE}\"" >> lib/default_sysinclude.hpp
+
+      tools/gcc_builtin_macros > lib/default_defines.hpp
+      write_version_desc
+      
+      mkdir -p bin
+      cd bin
+      cmake ..
+      make && make test && cp app/preshell "${INSTALLED}" && ln -fs "${INSTALLED}" "${BIN}/preshell"
+      cd ..
+    fi
+  git_repo_end
+  
+  git_repo_begin github.com sabel83 metashell
+    REV=`git rev-parse master`
+    INSTALLED_METASHELL="${BIN}/metashell_${REV}"
+    INSTALLED_CLANG="${BIN}/clang_metashell_${REV}"
+
+    if [ ! -f "${INSTALLED_METASHELL}" || ! -f "${INSTALLED_CLANG}" ]
+    then
+      tools/clang_default_path --gcc=g++ \
+        | egrep -v '"/usr/include"' \
+        > lib/extra_sysinclude.hpp
+      echo ", \"${USR_INCLUDE}\"" >> lib/extra_sysinclude.hpp
+
+      write_version_desc
+
+      rm -rf bin
+      ./build.sh
+    
+      bin/test/unit/metashell_unit_test \
+        && cp bin/app/metashell "${INSTALLED_METASHELL}" \
+        && ln -fs "${INSTALLED_METASHELL}" "${BIN}/metashell" \
+        && cp bin/app/clang_metashell "${INSTALLED_CLANG}" \
+        && ln -fs "${INSTALLED_CLANG}" "${BIN}/clang_metashell"
+    fi
+  git_repo_end
+  
+  git_repo_begin github.com sabel83 headers
+    rsync -r headers "${INCLUDE}"
+  git_repo_end
+
+  git_repo_begin github.com boostorg boost
+    REV=`git rev-parse master`
+    INSTALLED="${INCLUDE}/headers/boost/${REV}"
+    if [ ! -d "${INSTALLED}" ]
+    then
+      mkdir -p "${INSTALLED}"
+      for l in $(ls -d libs/*/)
+      do
+        cp -r "${l}include/boost" "${INSTALLED}"
+      done
+      ln -fs "${REV}" "${INCLUDE}/headers/boost/master"
+    fi
+  git_repo_end
+
+  follow_git_repo github.com sabel83 metatest master include/metatest
+  follow_git_repo github.com sabel83 mpllibs master mpllibs
+  follow_git_repo github.com minamiyama1994 FTMP master include/FTMP
+  follow_git_repo github.com ldionne hana master include/boost
+  follow_git_repo github.com pfultz2 Ripple master ripple
+  follow_git_repo github.com facebook fatal master fatal
+}
+
+
+
+
+########
+# Main #
+########
+
+export LC_ALL=C
+
+while true
+do
+  cd /usr/local/share/shell_demo
+
+  upgrade > /usr/local/share/shell_demo/last_log.txt 2>&1
+
+  sleep 3600
+done
+
