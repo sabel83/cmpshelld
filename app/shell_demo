@@ -102,7 +102,7 @@ function upgrade {
     INSTALLED_METASHELL="${BIN}/metashell_${REV}"
     INSTALLED_CLANG="${BIN}/clang_metashell_${REV}"
 
-    if [ ! -f "${INSTALLED_METASHELL}" || ! -f "${INSTALLED_CLANG}" ]
+    if [ ! -f "${INSTALLED_METASHELL}" ] || [ ! -f "${INSTALLED_CLANG}" ]
     then
       tools/clang_default_path --gcc=g++ \
         | egrep -v '"/usr/include"' \
