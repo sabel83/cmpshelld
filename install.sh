@@ -47,7 +47,8 @@ sudo apt-get -y install \
   libboost-regex-dev \
   libreadline-dev \
   shellinabox \
-  unzip
+  unzip \
+  libncurses5-dev
 
 # Install the daemons
 mkdir bin
