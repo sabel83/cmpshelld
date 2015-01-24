@@ -60,7 +60,7 @@ function write_version_desc {
     | sed 's/\\/\\\\/g' \
     | sed 's/"/\\"/g' \
     | sed 's/^/"/' | sed 's/$/\\n This demo is supported by the Eotvos Lorand University, Faculty of Informatics"/' \
-    > lib/version_desc.hpp
+    > lib/core/version_desc.hpp
 }
 
 function upgrade {
@@ -83,10 +83,10 @@ function upgrade {
     then
       tools/gcc_default_path --gcc=g++ \
         | egrep -v '"/usr/include"' \
-        > lib/default_sysinclude.hpp
-      echo ", \"${USR_INCLUDE}\"" >> lib/default_sysinclude.hpp
+        > lib/core/default_sysinclude.hpp
+      echo ", \"${USR_INCLUDE}\"" >> lib/core/default_sysinclude.hpp
 
-      tools/gcc_builtin_macros > lib/default_defines.hpp
+      tools/gcc_builtin_macros > lib/core/default_defines.hpp
       write_version_desc
       
       mkdir -p bin
@@ -106,8 +106,8 @@ function upgrade {
     then
       tools/clang_default_path --gcc=g++ \
         | egrep -v '"/usr/include"' \
-        > lib/extra_sysinclude.hpp
-      echo ", \"${USR_INCLUDE}\"" >> lib/extra_sysinclude.hpp
+        > lib/core/extra_sysinclude.hpp
+      echo ", \"${USR_INCLUDE}\"" >> lib/core/extra_sysinclude.hpp
 
       write_version_desc
 
