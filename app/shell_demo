@@ -41,6 +41,8 @@ function follow_git_repo {
   NAME="$3"
   BRANCH="$4"
   HEADER_PATH="$5"
+  HEADER_PATH2_SRC="$6"
+  HEADER_PATH2_DST="$7"
   INCLUDE="$(pwd)/include"
 
   git_repo_begin "${HOST}" "${USER}" "${NAME}"
@@ -50,6 +52,12 @@ function follow_git_repo {
     then
       mkdir -p "${INSTALLED}"
       cp -r "${HEADER_PATH}" "${INSTALLED}"
+      if [ -n "${HEADER_PATH2_SRC}" ]
+      then
+        mkdir -p "${INSTALLED}/${HEADER_PATH2_DST}"
+        cp -r "${HEADER_PATH2_SRC}" "${INSTALLED}/${HEADER_PATH2_DST}"
+      fi
+      rm "${INCLUDE}/headers/${NAME}/${BRANCH}"
       ln -fs "${REV}" "${INCLUDE}/headers/${NAME}/${BRANCH}"
     fi
   git_repo_end
@@ -141,7 +149,7 @@ function upgrade {
   git_repo_end
 
   follow_git_repo github.com sabel83 metatest master include/metatest
-  follow_git_repo github.com sabel83 mpllibs master mpllibs
+  follow_git_repo github.com sabel83 mpllibs master mpllibs libs/metaparse/example/getting_started mpllibs/metaparse
   follow_git_repo github.com minamiyama1994 FTMP master include/FTMP
   follow_git_repo github.com ldionne hana master include/boost
   follow_git_repo github.com pfultz2 Ripple master ripple
