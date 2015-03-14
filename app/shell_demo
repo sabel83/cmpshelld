@@ -154,6 +154,7 @@ function upgrade {
   follow_git_repo github.com ldionne hana master include/boost
   follow_git_repo github.com pfultz2 Ripple master ripple
   follow_git_repo github.com facebook fatal master fatal
+  follow_git_repo github.com ericniebler meta master include/meta
 }
 
 
