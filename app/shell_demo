@@ -20,6 +20,7 @@ function git_repo_begin {
   HOST="$1"
   USER="$2"
   NAME="$3"
+  BRANCH="$4"
   DIR_NAME="${USER}_${NAME}"
   if [ -e "${DIR_NAME}" ]; then
     echo "${DIR_NAME} already exists"
@@ -27,7 +28,9 @@ function git_repo_begin {
     git clone --recursive "https://${HOST}/${USER}/${NAME}.git" "${DIR_NAME}"
   fi
   cd "${DIR_NAME}"
-  git pull origin master
+  git branch "${BRANCH}" "origin/${BRANCH}"
+  git checkout "${BRANCH}"
+  git pull origin "${BRANCH}"
   git submodule foreach git pull
 }
 
@@ -45,7 +48,7 @@ function follow_git_repo {
   HEADER_PATH2_DST="$7"
   INCLUDE="$(pwd)/include"
 
-  git_repo_begin "${HOST}" "${USER}" "${NAME}"
+  git_repo_begin "${HOST}" "${USER}" "${NAME}" "${BRANCH}"
     REV=`git rev-parse "${BRANCH}"`
     INSTALLED="${INCLUDE}/headers/${NAME}/${REV}"
     if [ ! -d "${INSTALLED}" ]
@@ -57,6 +60,9 @@ function follow_git_repo {
         mkdir -p "${INSTALLED}/${HEADER_PATH2_DST}"
         cp -r "${HEADER_PATH2_SRC}" "${INSTALLED}/${HEADER_PATH2_DST}"
       fi
+    fi
+    if [ "$(readlink "${INCLUDE}/headers/${NAME}/${BRANCH}")" != "${REV}" ]
+    then
       rm "${INCLUDE}/headers/${NAME}/${BRANCH}"
       ln -fs "${REV}" "${INCLUDE}/headers/${NAME}/${BRANCH}"
     fi
@@ -83,7 +89,7 @@ function upgrade {
     $(ls -d /usr/include/* | egrep -v '^/usr/include/(boost|mpllibs)$') \
     "${USR_INCLUDE}"
 
-  git_repo_begin github.com sabel83 preshell
+  git_repo_begin github.com sabel83 preshell master
     REV=`git rev-parse master`
     INSTALLED="${BIN}/preshell_${REV}"
 
@@ -105,7 +111,7 @@ function upgrade {
     fi
   git_repo_end
   
-  git_repo_begin github.com sabel83 metashell
+  git_repo_begin github.com sabel83 metashell master
     REV=`git rev-parse master`
     INSTALLED_METASHELL="${BIN}/metashell_${REV}"
     INSTALLED_CLANG="${BIN}/clang_metashell_${REV}"
@@ -130,11 +136,11 @@ function upgrade {
     fi
   git_repo_end
   
-  git_repo_begin github.com sabel83 headers
+  git_repo_begin github.com sabel83 headers master
     rsync -r headers "${INCLUDE}"
   git_repo_end
 
-  git_repo_begin github.com boostorg boost
+  git_repo_begin github.com boostorg boost master
     REV=`git rev-parse master`
     INSTALLED="${INCLUDE}/headers/boost/${REV}"
     if [ ! -d "${INSTALLED}" ]
@@ -154,6 +160,7 @@ function upgrade {
   follow_git_repo github.com ldionne hana master include/boost
   follow_git_repo github.com pfultz2 Ripple master ripple
   follow_git_repo github.com facebook fatal master fatal
+  follow_git_repo github.com facebook fatal dev fatal
   follow_git_repo github.com ericniebler meta master include/meta
 }
 
