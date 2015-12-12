@@ -114,9 +114,9 @@ function upgrade {
   git_repo_begin github.com sabel83 metashell master
     REV=`git rev-parse master`
     INSTALLED_METASHELL="${BIN}/metashell_${REV}"
-    INSTALLED_CLANG="${BIN}/clang_metashell_${REV}"
+    INSTALLED_TEMPLIGHT="${BIN}/templight_metashell_${REV}"
 
-    if [ ! -f "${INSTALLED_METASHELL}" ] || [ ! -f "${INSTALLED_CLANG}" ]
+    if [ ! -f "${INSTALLED_METASHELL}" ] || [ ! -f "${INSTALLED_TEMPLIGHT=}" ]
     then
       tools/clang_default_path --gcc=g++ \
         | egrep -v '"/usr/include"' \
@@ -131,8 +131,8 @@ function upgrade {
       bin/test/unit/metashell_unit_test \
         && cp bin/app/metashell "${INSTALLED_METASHELL}" \
         && ln -fs "${INSTALLED_METASHELL}" "${BIN}/metashell" \
-        && cp bin/app/clang_metashell "${INSTALLED_CLANG}" \
-        && ln -fs "${INSTALLED_CLANG}" "${BIN}/clang_metashell"
+        && cp bin/app/templight_metashell "${INSTALLED_TEMPLIGHT=}" \
+        && ln -fs "${INSTALLED_TEMPLIGHT=}" "${BIN}/templight_metashell"
     fi
   git_repo_end
   
