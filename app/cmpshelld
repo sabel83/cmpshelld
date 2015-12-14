@@ -27,6 +27,18 @@ import time
 import fcntl
 import json
 import datetime
+import tempfile
+import shutil
+import subprocess
+
+class TempDir:
+  def __enter__(self):
+    self.path = tempfile.mkdtemp()
+    return self
+
+  def __exit__(self, type, value, traceback):
+    shutil.rmtree(self.path)
+
 
 def append_to_file(filename, s):
   f = open(filename, 'a')
@@ -142,7 +154,9 @@ def main():
   limit_memory(2048)
 
   try:
-    os.execvp(binary, shell_args)
+    with TempDir() as temp:
+      os.chdir(temp.path)
+      subprocess.call([binary] + shell_args)
   except OSError as e:
     print 'Error running the shell: %s' % (e)
     sys.exit(1)
@@ -154,5 +168,4 @@ if __name__ == '__main__':
     raise
   except:
     print 'Uncaught exception'
-
 
