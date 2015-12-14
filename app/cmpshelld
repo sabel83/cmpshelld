@@ -139,7 +139,11 @@ def main():
   shell_args = [binary]
   for l,v in lib_versions.items():
     if lib_exists(includes, l):
-      shell_args.extend(['-I', os.path.realpath('%s/%s/%s' % (includes, l, v))])
+      new_args = ['-I', os.path.realpath('%s/%s/%s' % (includes, l, v))]
+      if 'preshell' in binary:
+        shell_args.extend(new_args)
+      else:
+        extra_args.extend(new_args)
     else:
       print 'Library not found: %s' % (l)
       sys.exit(1)
