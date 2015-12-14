@@ -81,10 +81,12 @@ function upgrade {
   BIN="$(pwd)/bin"
   INCLUDE="$(pwd)/include"
   USR_INCLUDE="${INCLUDE}/usr/include"
+  METASHELL_INCLUDE="${INCLUDE}/metashell"
 
   mkdir bin
 
   mkdir -p "${USR_INCLUDE}"
+  mkdir -p "${METASHELL_INCLUDE}"
   ln -s \
     $(ls -d /usr/include/* | egrep -v '^/usr/include/(boost|mpllibs)$') \
     "${USR_INCLUDE}"
@@ -118,21 +120,23 @@ function upgrade {
 
     if [ ! -f "${INSTALLED_METASHELL}" ] || [ ! -f "${INSTALLED_TEMPLIGHT=}" ]
     then
-      tools/clang_default_path --gcc=g++ \
-        | egrep -v '"/usr/include"' \
-        > lib/core/extra_sysinclude.hpp
-      echo ", \"${USR_INCLUDE}\"" >> lib/core/extra_sysinclude.hpp
-
       write_version_desc
 
       rm -rf bin
       ./build.sh
     
-      bin/test/unit/metashell_unit_test \
-        && cp bin/app/metashell "${INSTALLED_METASHELL}" \
-        && ln -fs "${INSTALLED_METASHELL}" "${BIN}/metashell" \
-        && cp bin/app/templight_metashell "${INSTALLED_TEMPLIGHT=}" \
-        && ln -fs "${INSTALLED_TEMPLIGHT=}" "${BIN}/templight_metashell"
+      METASHELL_SRC="$(pwd)"
+      TEMPLIGHT_SRC="${METASHELL_SRC}/3rd/templight"
+      cd bin
+        TEMPLIGHT_HEADERS="${TEMPLIGHT_SRC}/$(cmake .. -DTEMPLIGHT_DEBUG=1 | egrep 'TEMPLIGHT_HEADERS = ' | sed 's/^.*3rd\/templight\/build\//build\//')"
+        echo "TEMPLIGHT_HEADERS = ${TEMPLIGHT_HEADERS}"
+        test/unit/metashell_unit_test \
+          && ln -fs "${TEMPLIGHT_HEADERS}" "${METASHELL_INCLUDE}/templight" \
+          && cp app/metashell "${INSTALLED_METASHELL}" \
+          && ln -fs "${INSTALLED_METASHELL}" "${BIN}/metashell" \
+          && cp app/templight_metashell "${INSTALLED_TEMPLIGHT=}" \
+          && ln -fs "${INSTALLED_TEMPLIGHT=}" "${BIN}/templight_metashell"
+      cd ..
     fi
   git_repo_end
   
