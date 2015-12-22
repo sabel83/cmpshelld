@@ -134,8 +134,8 @@ function upgrade {
           && ln -fs "${TEMPLIGHT_HEADERS}" "${METASHELL_INCLUDE}/templight" \
           && cp app/metashell "${INSTALLED_METASHELL}" \
           && ln -fs "${INSTALLED_METASHELL}" "${BIN}/metashell" \
-          && cp app/templight_metashell "${INSTALLED_TEMPLIGHT=}" \
-          && ln -fs "${INSTALLED_TEMPLIGHT=}" "${BIN}/templight_metashell"
+          && cp app/templight_metashell "${INSTALLED_TEMPLIGHT}" \
+          && ln -fs "${INSTALLED_TEMPLIGHT}" "${BIN}/templight_metashell"
       cd ..
     fi
   git_repo_end
