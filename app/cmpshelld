@@ -148,7 +148,7 @@ def main():
       print 'Library not found: %s' % (l)
       sys.exit(1)
   if std != '':
-    shell_args.extend(['--std', std])
+    extra_args.extend(['--std', std])
   if len(extra_args) != 0:
     shell_args.append('--')
     shell_args.extend(extra_args)
