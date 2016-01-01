@@ -21,7 +21,6 @@ SHELL_USER=nobody
 DIR=/usr/local/share/shell_demo
 
 # Stop the demo if it is running
-sudo /etc/init.d/preshell stop
 sudo /etc/init.d/metashell stop
 sudo /etc/init.d/shell_demo stop
 sudo rm -rf "${DIR}"
@@ -57,7 +56,6 @@ cmake .. && sudo make install
 cd ..
 
 # Start the daemons
-sudo /etc/init.d/preshell start
 sudo /etc/init.d/metashell start
 sudo /etc/init.d/shell_demo start
 

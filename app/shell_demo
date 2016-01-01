@@ -91,28 +91,6 @@ function upgrade {
     $(ls -d /usr/include/* | egrep -v '^/usr/include/(boost|mpllibs)$') \
     "${USR_INCLUDE}"
 
-  git_repo_begin github.com sabel83 preshell master
-    REV=`git rev-parse master`
-    INSTALLED="${BIN}/preshell_${REV}"
-
-    if [ ! -f "${INSTALLED}" ]
-    then
-      tools/gcc_default_path --gcc=g++ \
-        | egrep -v '"/usr/include"' \
-        > lib/core/default_sysinclude.hpp
-      echo ", \"${USR_INCLUDE}\"" >> lib/core/default_sysinclude.hpp
-
-      tools/gcc_builtin_macros > lib/core/default_defines.hpp
-      write_version_desc
-      
-      mkdir -p bin
-      cd bin
-      cmake ..
-      make && make test && cp app/preshell "${INSTALLED}" && ln -fs "${INSTALLED}" "${BIN}/preshell"
-      cd ..
-    fi
-  git_repo_end
-  
   git_repo_begin github.com sabel83 metashell master
     REV=`git rev-parse master`
     INSTALLED_METASHELL="${BIN}/metashell_${REV}"

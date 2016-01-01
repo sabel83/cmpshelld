@@ -1,8 +1,7 @@
 # C++ metaprogramming shell daemon
 
 This repository contains a setup script for the
-[Metashell](github.com/sabel83/metashell) and
-[Preshell](github.com/sabel83/preshell) online demos on an Ubuntu server.
+[Metashell](github.com/sabel83/metashell) online demo on an Ubuntu server.
 You can use it to host your own online demo of the shells.
 
 ## Setting your server up
@@ -22,10 +21,9 @@ You can use it to host your own online demo of the shells.
 
 ## The services providing the demo
 
-The demo is provided by three services:
+The demo is provided by two services:
 
 * `metashell` This is a ShellInABox service running Metashell as its shell.
-* `preshell` This is a ShellInABox service running Preshell as its shell.
 * `shell_demo` This is a service periodically updating the C++ headers which
   can be used from the services and building the latest version of Preshell
   and Metashell.
@@ -42,7 +40,6 @@ startup. To start them manually run the following commands:
 
 ```
 sudo /etc/init.d/shell_demo start
-sudo /etc/init.d/preshell start
 sudo /etc/init.d/metashell start
 ```
 
@@ -52,7 +49,6 @@ To stop the demo, you need to stop the three services providing it:
 
 ```
 sudo /etc/init.d/shell_demo stop
-sudo /etc/init.d/preshell stop
 sudo /etc/init.d/metashell stop
 ```
 
