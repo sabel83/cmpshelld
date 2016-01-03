@@ -136,7 +136,7 @@ def main():
     print 'Getting help: --help'
     sys.exit(1)
    
-  shell_args = [binary]
+  shell_args = [binary, '--disable_saving']
   for l,v in lib_versions.items():
     if lib_exists(includes, l):
       extra_args.extend(
